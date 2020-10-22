@@ -19,12 +19,12 @@ namespace Natmc.Resources
             return File.Exists(Path.Combine(BasePath, path));
         }
 
-        public byte[] ReadFile(string path)
+        public Stream OpenFile(string path)
         {
             if (!FileExists(path))
                 return null;
 
-            return File.ReadAllBytes(Path.Combine(BasePath, path));
+            return new FileStream(path, FileMode.Open, FileAccess.Read);
         }
     }
 }

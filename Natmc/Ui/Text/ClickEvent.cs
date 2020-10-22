@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Natmc.Ui.Text
 {
-    class ClickEvent
+    public abstract class ClickEvent
     {
+        public ClickEventType Type { get; protected set; }
+
+        public abstract void OnClick();
     }
 }

@@ -34,15 +34,12 @@ namespace Natmc.Resources
             return Archive.GetEntry(path) != null;
         }
 
-        public byte[] ReadFile(string path)
+        public Stream OpenFile(string path)
         {
             var entry = Archive.GetEntry(path);
             if (entry == null)
                 return null;
-            var data = new byte[entry.Length];
-            using (var stream = entry.Open())
-                stream.Read(data);
-            return data;
+            return entry.Open();
         }
 
         public void Dispose()

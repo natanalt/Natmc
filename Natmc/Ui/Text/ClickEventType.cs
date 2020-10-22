@@ -6,5 +6,10 @@ namespace Natmc.Ui.Text
 {
     public enum ClickEventType
     {
+        OpenUrl,
+        OpenFile,
+        RunCommand,
+        SuggestCommand,
+        ChangePage
     }
 }

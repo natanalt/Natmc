@@ -11,7 +11,6 @@ namespace Natmc.Graphics.Base
 
         public Texture(Stream stream)
         {
-            Image<Rgba32> image = Image.Load(stream);
         }
 
         public void Dispose()
