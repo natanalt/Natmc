@@ -19,6 +19,8 @@ namespace Natmc.Resources
 
         public ResourcePack(string path)
         {
+            // TODO: cleanup ResourcePack constructor code
+
             if (Directory.Exists(path))
                 PackReader = new DirectoryPackReader(path);
             else
@@ -66,7 +68,7 @@ namespace Natmc.Resources
                             Code = kv.Key,
                             Name = kv.Value["name"].ToString(),
                             Region = kv.Value["region"].ToString(),
-                            IsBidirectional = kv.Value["bidirectional"].Value<bool>()
+                            IsBidirectional = kv.Value["bidirectional"].Value<bool>(),
                         });
                     }
                 }

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Natmc.Logging;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace Natmc.Core
 {
@@ -13,6 +15,10 @@ namespace Natmc.Core
 
         public static void Start()
         {
+            Thread.CurrentThread.Name = "MainThread";
+            Logger.Init();
+            Logger.AddLogOutput<ConsoleLogOutput>();
+            Settings.Load();
             Window = new MainWindow();
             Window.Run();
         }
