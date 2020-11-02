@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Natmc": {
+      "commandName": "Project",
+      "workingDirectory": "$(SolutionDir)WorkingDir"
+    }
+  }
+}

@@ -1,118 +1,108 @@
-﻿using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
+﻿using Natmc.Logging;
+using Natmc.Platform;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Natmc.Core
 {
-    public enum FramePhase
+    public class MainWindow : IWindowEventDispatcher
     {
-        Update, Render
-    }
+        private static readonly LogScope Log = new LogScope("MainWindow");
 
-    public class MainWindow : GameWindow
-    {
+        public IWindow Owner { get; set; }
         public FramePhase CurrentPhase { get; protected set; }
+        public bool Started { get; protected set; }
 
-        public int FPS { get; protected set; }
-        public ulong TotalFrames { get; protected set; }
+        public int Fps;
+        public long TotalFrames;
         private int FramesThisSecond;
         private float DeltaTimer;
 
-        private bool ChangedStates;
-
+        private bool ChangedStateInUpdate;
         private IGameState m_CurrentState;
         public IGameState CurrentState
         {
             get => m_CurrentState;
             set
             {
-                if (CurrentPhase != FramePhase.Update)
-                    throw new InvalidOperationException("Can't change states on render");
+                if (value == null)
+                    throw new ArgumentNullException();
 
-                if (m_CurrentState == value)
-                    return;
+                if (CurrentPhase != FramePhase.Update)
+                    throw new InvalidOperationException("Can't change game state in non update phase");
 
                 if (m_CurrentState != null)
                     m_CurrentState.OnDisable();
                 m_CurrentState = value;
-                if (m_CurrentState != null)
-                    m_CurrentState.OnDisable();
-                ChangedStates = true;
+                m_CurrentState.Window = this;
+
+                if (Started)
+                {
+                    m_CurrentState.OnEnable();
+                    ChangedStateInUpdate = true;
+                }
             }
         }
 
-        public MainWindow() : base(
-            new GameWindowSettings()
-            {
-                IsMultiThreaded = false,
-                RenderFrequency = 60.0,
-                UpdateFrequency = 60.0,
-            },
-            new NativeWindowSettings()
-            {
-                API = ContextAPI.OpenGL,
-                APIVersion = new Version(3, 3),
-                Size = new Vector2i(1024, 768),
-                Title = "Natmc",
-            })
-        { }
-
-        public override void Run()
+        public MainWindow()
         {
-            FPS = 0;
+            Fps = 0;
             TotalFrames = 0;
             FramesThisSecond = 0;
             DeltaTimer = 0;
-            ChangedStates = false;
-            base.Run();
         }
 
-        protected override void OnLoad()
+        public void OnLoad()
         {
-            CurrentState?.OnEnable();
-            base.OnLoad();
-        }
+            Started = true;
+            Log.Info($"Using {Owner.RenderingApi.DetailedName} as renderer");
 
-        protected override void OnUnload()
+            if (CurrentState != null)
+            {
+                CurrentState.Window = this;
+                CurrentState.OnEnable();
+            }
+        }
+        
+        public void OnUnload()
         {
             CurrentState?.OnDisable();
-            base.OnUnload();
+            Started = false;
         }
-
-        protected override void OnResize(ResizeEventArgs e)
+        
+        public void OnResize()
         {
-            GL.Viewport(0, 0, e.Width, e.Height);
-            CurrentState?.OnResize(e.Width, e.Height);
-            base.OnResize(e);
+            CurrentState?.OnResize(Owner.Size.X, Owner.Size.Y);
         }
-
-        protected override void OnUpdateFrame(FrameEventArgs args)
+        
+        public void OnUpdate(float delta)
         {
-            DeltaTimer += (float)args.Time;
+            CurrentPhase = FramePhase.Update;
+
+            TotalFrames += 1;
             FramesThisSecond += 1;
-
-            if (DeltaTimer > 1)
+            DeltaTimer += delta;
+            
+            if (DeltaTimer >= 1)
             {
-                FPS = FramesThisSecond;
-                DeltaTimer = 0;
+                Fps = FramesThisSecond;
                 FramesThisSecond = 0;
+                DeltaTimer -= 1;
             }
 
-            Title = $"Natmc [{FPS} FPS]";
-
-            CurrentState?.OnUpdate((float)args.Time);
-            base.OnUpdateFrame(args);
+            Owner.Title = $"Natmc [{Fps} FPS] - {Owner.RenderingApi.DetailedName} - {CurrentState.GetType().Name}";
+            CurrentState?.OnUpdate(delta);
         }
 
-        protected override void OnRenderFrame(FrameEventArgs args)
+        public void OnRender(float delta)
         {
-            if (ChangedStates)
-                CurrentState?.OnRender((float)args.Time);
-            base.OnRenderFrame(args);
+            CurrentPhase = FramePhase.Render;
+
+            if (ChangedStateInUpdate)
+                return;
+
+            CurrentState?.OnRender(delta);
         }
     }
 }

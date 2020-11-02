@@ -1,4 +1,8 @@
-﻿using Natmc.Ui.Text;
+using Natmc.Json;
+using Natmc.Logging;
+using Natmc.Resources.Languages;
+using Natmc.Resources.Readers;
+using Natmc.Ui.Text;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -9,72 +13,98 @@ namespace Natmc.Resources
 {
     public class ResourcePack
     {
+        private static readonly LogScope Log = new LogScope("ResourcePackLoader");
+
         // 6 => 1.16.2 - 1.16.3
         public const int CurrentPackFormat = 6;
 
+        public string Id;
         public int PackFormat;
         public TextComponent Description;
         public List<Language> AdditionalLanguages;
         public IPackReader PackReader;
 
+        public static IPackReader CreatePackReader(string archivePath)
+        {
+            if (Filesystem.DirectoryExists(archivePath))
+            {
+                return new DirectoryPackReader(archivePath);
+            }
+            else if (archivePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) && Filesystem.FileExists(archivePath))
+            {
+                return new ZipPackReader(archivePath);
+            }
+            else
+            {
+                throw new FormatException("Unknown resource pack type");
+            }
+        }
+
         public ResourcePack(string path)
         {
-            // TODO: cleanup ResourcePack constructor code
-
-            if (Directory.Exists(path))
-                PackReader = new DirectoryPackReader(path);
-            else
-                PackReader = new ZipPackReader(path);
+            Id = path;
+            PackReader = CreatePackReader(path);
+            Log.Info($"Opening resource pack `{path}`, pack reader type {PackReader.GetType().Name}");
 
             if (!PackReader.FileExists("pack.mcmeta"))
-                throw new FileNotFoundException("pack.mcmeta does not exist");
+                throw new FormatException("pack.mcmeta doesn't exist");
 
-            string packMetaData;
-            using (var stream = PackReader.OpenFile("pack.mcmeta"))
+            var packMetaRoot = JObject.Parse(PackReader.ReadTextFile("pack.mcmeta"));
+            var packMetaScheme = new ObjectSchema
             {
-                using var reader = new StreamReader(stream);
-                packMetaData = reader.ReadToEnd();
-            }
+                ["pack"] = new ObjectSchema
+                {
+                    ["description"] = "string|object",
+                    ["pack_format"] = "number",
+                },
+                ["language"] = new ObjectSchema()
+            };
+            JsonValidator.ValidateWithException(packMetaRoot, packMetaScheme, "Invalid pack.mcmeta");
 
-            var packMetaRoot = new JObject(packMetaData);
-            
-            var packMeta = packMetaRoot["pack"];
-
-            if (packMeta["pack_format"].Type != JTokenType.Integer)
-                throw new FormatException("pack_format must be an integer");
-            PackFormat = packMeta["pack_format"].Value<int>();
+            var packMeta = packMetaRoot.Value<JObject>("pack");
+            PackFormat = packMeta.Value<int>("pack_format");
 
             var descriptionToken = packMeta["description"];
             if (descriptionToken.Type == JTokenType.String)
-                Description = new StringComponent(descriptionToken.Value<string>());
-            else if (descriptionToken.Type == JTokenType.Object)
             {
-                Description = TextComponent.FromJsonObject(descriptionToken.Value<JObject>(), out string error);
-                if (Description == null)
-                    throw new FormatException(error);
+                Description = new StringComponent(descriptionToken.Value<string>());
             }
             else
-                throw new FormatException("Invalid description type");
+            {
+                Description = TextComponent.FromJsonObject(
+                    packMeta["description"].Value<JObject>(),
+                    out string parseError);
+                if (Description == null)
+                    throw new FormatException($"Invalid pack.mcmeta - invalid description - {parseError}");
+            }
 
             AdditionalLanguages = new List<Language>();
-            if (packMetaRoot.ContainsKey("languages"))
+            if (packMetaRoot.ContainsKey("language"))
             {
-                if (packMetaRoot["language"] is JObject languages)
+                var languagesTag = packMetaRoot["language"];
+                if (languagesTag.Type != JTokenType.Object)
+                    throw new FormatException("Invalid pack.mcmeta - invalid type of language");
+
+                foreach (var kv in languagesTag.Value<JObject>())
                 {
-                    foreach (var kv in languages)
+                    var value = kv.Value.Value<JObject>();
+
+                    var languageSchema = new ObjectSchema
                     {
-                        AdditionalLanguages.Add(new Language
-                        {
-                            Code = kv.Key,
-                            Name = kv.Value["name"].ToString(),
-                            Region = kv.Value["region"].ToString(),
-                            IsBidirectional = kv.Value["bidirectional"].Value<bool>(),
-                        });
-                    }
-                }
-                else
-                {
-                    throw new FileLoadException("languages should be a JObject");
+                        ["name"] = "string",
+                        ["region"] = "string"
+                    };
+                    JsonValidator.ValidateWithException(value, languageSchema, $"Invalid language {kv.Key}");
+
+                    var language = new Language
+                    {
+                        Code = kv.Key,
+                        Name = value["name"].ToString(),
+                        Region = value["region"].ToString(),
+                        IsBidirectional = value.ContainsKey("bidirectional") && value.Value<bool>("bidirectional"),
+                    };
+
+                    AdditionalLanguages.Add(language);
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,6 +12,20 @@ namespace Natmc.Ui.Text
         public TextComponentType Type { get; protected set; }
         public TextComponent Parent { get; set; }
         public List<TextComponent> Siblings { get; protected set; }
+
+        public string RawText
+        {
+            get
+            {
+                var builder = new StringBuilder();
+                builder.Append(Resolve());
+                foreach (var sibling in Siblings)
+                {
+                    builder.Append(sibling.RawText);
+                }
+                return builder.ToString();
+            }
+        }
 
         private bool? m_Bold;
         public bool? Bold

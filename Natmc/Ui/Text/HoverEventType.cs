@@ -1,4 +1,4 @@
-﻿
+
 namespace Natmc.Ui.Text
 {
     public enum HoverEventType

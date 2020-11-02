@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
 
-namespace Natmc.Resources
+namespace Natmc.Resources.Readers
 {
-    public class ZipPackReader : IPackReader, IDisposable
+    public class ZipPackReader : IPackReader
     {
         public Stream ArchiveStream { get; protected set; }
         public ZipArchive Archive { get; protected set; }
 
         public ZipPackReader(string archivePath)
         {
-            ArchiveStream = new FileStream(archivePath, FileMode.Open, FileAccess.Read);
+            ArchiveStream = Filesystem.OpenFile(archivePath, FileMode.Open, FileAccess.Read);
             Archive = new ZipArchive(ArchiveStream, ZipArchiveMode.Read, false);
         }
 

@@ -1,4 +1,4 @@
-﻿using Natmc.Core;
+using Natmc.Core;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -26,17 +26,19 @@ namespace Natmc.Logging
             MessageColor = ConsoleColor.White;
 
             Console.Title = $"Natmc {Engine.Version} Debug Logs";
-            Console.BufferWidth = 120;
-            Console.WindowWidth = 120;
-            Console.WindowHeight = 50;
+            //Console.BufferWidth = 120;
+            //Console.WindowWidth = 120;
+            //Console.WindowHeight = 50;
         }
 
         public void Log(LogType type, string module, string message)
         {
             LogMutex.WaitOne();
 
-            Console.ForegroundColor = LogColors[type];
+            Console.BackgroundColor = LogColors[type];
+            Console.ForegroundColor = ConsoleColor.Black;
             Console.Write($"[{type}]");
+            Console.BackgroundColor = ConsoleColor.Black;
 
             Console.ForegroundColor = ThreadModuleColor;
             Console.Write($"[{Thread.CurrentThread.Name}][{module}] ");

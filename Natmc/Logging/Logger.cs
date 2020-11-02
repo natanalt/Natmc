@@ -1,24 +1,29 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace Natmc.Logging
 {
     public static class Logger
     {
         public static List<ILogOutput> LogOutputs { get; private set; }
+        public static Mutex LogMutex { get; private set; }
 
         public static void Init()
         {
             LogOutputs = new List<ILogOutput>();
+            LogMutex = new Mutex();
         }
 
         public static void Log(LogType type, string module, string message)
         {
+            LogMutex.WaitOne();
             foreach (var output in LogOutputs)
             {
                 output.Log(type, module, message);
             }
+            LogMutex.ReleaseMutex();
         }
 
         public static void AddLogOutput<T>() => LogOutputs.Add((ILogOutput)Activator.CreateInstance<T>());

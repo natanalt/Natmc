@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
-namespace Natmc.Resources
+namespace Natmc.Resources.Readers
 {
     public class DirectoryPackReader : IPackReader
     {
@@ -16,15 +13,18 @@ namespace Natmc.Resources
 
         public bool FileExists(string path)
         {
-            return File.Exists(Path.Combine(BasePath, path));
+            return Filesystem.FileExists(Path.Combine(BasePath, path));
         }
 
         public Stream OpenFile(string path)
         {
             if (!FileExists(path))
                 return null;
+            return Filesystem.OpenFile(Path.Combine(BasePath, path), FileMode.Open, FileAccess.Read);
+        }
 
-            return new FileStream(path, FileMode.Open, FileAccess.Read);
+        public void Dispose()
+        {
         }
     }
 }

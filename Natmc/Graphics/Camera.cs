@@ -1,4 +1,4 @@
-﻿using Natmc.Core;
+using Natmc.Core;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using System;
@@ -88,7 +88,6 @@ namespace Natmc.Graphics
 
         public Camera()
         {
-            Engine.Window.Resize += ResizeHook;
         }
         
         public void Translate(Vector3 move)
@@ -98,21 +97,20 @@ namespace Natmc.Graphics
 
         public void Dispose()
         {
-            Engine.Window.Resize -= ResizeHook;
         }
 
         private void RegenerateProjectionMatrix()
         {
             ProjectionMatrix = Matrix4.CreatePerspectiveFieldOfView(
                 FovRadians,
-                (float)Engine.Window.ClientSize.X / Engine.Window.ClientSize.Y,
+                (float)Engine.Window.Size.X / Engine.Window.Size.Y,
                 DepthNear,
                 DepthFar);
         }
 
         private void RegenerateViewMatrix()
         {
-            ViewMatrix = Matrix4.CreateTranslation(-Position) * Matrix4.CreateFromQuaternion(Rotation.Inverted());
+            ViewMatrix = Matrix4.CreateFromQuaternion(Rotation.Inverted()) * Matrix4.CreateTranslation(-Position);
         }
 
         private void ResizeHook(ResizeEventArgs _)
