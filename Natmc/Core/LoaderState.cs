@@ -1,4 +1,5 @@
-﻿using Natmc.MainMenu;
+﻿using Natmc.Logging;
+using Natmc.MainMenu;
 using Natmc.Resources;
 using System;
 using System.Collections.Generic;
@@ -7,13 +8,17 @@ using System.Threading;
 
 namespace Natmc.Core
 {
-    public class LoaderState : IGameState
+    public class LoaderState : GameState
     {
-        public MainWindow Window { get; set; }
-        public Thread LoadingThread;
+        private static readonly LogScope Log = new LogScope("LoaderState");
 
-        public void OnEnable()
+        public Thread LoadingThread { get; protected set; }
+
+        public override void OnEnable()
         {
+            Log.Info($"Used renderer: {RenderingApi.Name} ({RenderingApi.DetailedName})");
+
+            Log.Info($"Starting loader thread");
             LoadingThread = new Thread(() =>
             {
                 ResourceManager.Init();
@@ -22,16 +27,18 @@ namespace Natmc.Core
             LoadingThread.Start();
         }
 
-        public void OnUpdate(float delta)
+        public override void OnUpdate(float delta)
         {
+            Engine.UpdateMainWindowTitle();
+
             if (!LoadingThread.IsAlive)
             {
                 Window.CurrentState = new MainMenuState();
             }
         }
 
-        public void OnDisable() { }
-        public void OnResize(int nw, int nh) { }
-        public void OnRender(float delta) { }
+        public override void OnDisable() { }
+        public override void OnResize(int nw, int nh) { }
+        public override void OnRender(float delta) { }
     }
 }

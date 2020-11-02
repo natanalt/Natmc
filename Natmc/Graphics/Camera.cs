@@ -101,11 +101,7 @@ namespace Natmc.Graphics
 
         private void RegenerateProjectionMatrix()
         {
-            ProjectionMatrix = Matrix4.CreatePerspectiveFieldOfView(
-                FovRadians,
-                (float)Engine.Window.Size.X / Engine.Window.Size.Y,
-                DepthNear,
-                DepthFar);
+            throw new NotImplementedException();
         }
 
         private void RegenerateViewMatrix()
