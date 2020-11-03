@@ -37,7 +37,7 @@ namespace Natmc.Platform.OTK
             InternalWindow.Load += () =>
             {
                 GL.Enable(EnableCap.DepthTest);
-                RenderingApi = new Ogl3RenderingApi();
+                RenderingApi = new Ogl3RenderingApi(this);
                 RenderingApi.Init();
                 CurrentState.OnEnable();
             };

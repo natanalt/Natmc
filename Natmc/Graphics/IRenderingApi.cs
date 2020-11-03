@@ -19,19 +19,19 @@ namespace Natmc.Graphics
         public void EndFrame();
 
         public void BeginUi();
-        public void RenderUntexturedQuad(Vector2i position, Vector2i size, Color4 color);
-        public void RenderTexturedQuad(
-            Vector2i position,
-            Vector2i size,
+        public void DrawColoredQuad(Vector2 position, Vector2 size, Color4 color);
+        public void DrawTexturedQuad(
+            Vector2 position,
+            Vector2 size,
             ITexture texture,
-            Vector2i? textureOrigin = null,
-            Vector2i? textureSize = null);
+            Vector2? textureOrigin = null,
+            Vector2? textureSize = null);
         public void EndUi();
 
         public void BeginWorld();
-        public void RenderSky();
-        public void RenderChunk(/*...*/);
-        public void RenderEntity(/*...*/);
+        public void DrawSky();
+        public void DrawChunk(/*...*/);
+        public void DrawEntity(/*...*/);
         public void EndWorld();
     }
 }

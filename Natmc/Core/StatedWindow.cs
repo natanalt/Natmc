@@ -30,8 +30,9 @@ namespace Natmc.Core
                     throw new InvalidOperationException("Can't change game state in non update phase");
 
                 m_CurrentState.OnDisable();
-                m_CurrentState.Window = this;
+
                 m_CurrentState = value;
+                m_CurrentState.Window = this;
 
                 if (IsRunning)
                 {
