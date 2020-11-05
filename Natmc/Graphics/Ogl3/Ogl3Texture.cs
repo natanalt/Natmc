@@ -17,7 +17,9 @@ namespace Natmc.Graphics.Ogl3
             Width = width;
             Height = height;
 
+            Console.WriteLine(GL.GetError());
             GlHandle = GL.GenTexture();
+            Console.WriteLine(GL.GetError());
             GL.BindTexture(TextureTarget.Texture2D, GlHandle);
             GL.TexImage2D(
                 TextureTarget.Texture2D,

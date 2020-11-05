@@ -15,7 +15,7 @@ namespace Natmc.Graphics
 
         public ITexture CreateTexture(byte[] rawData, int width, int height);
 
-        public void BeginFrame();
+        public void BeginFrame(float delta);
         public void EndFrame();
 
         public void BeginUi();
@@ -23,6 +23,7 @@ namespace Natmc.Graphics
         public void DrawTexturedQuad(
             Vector2 position,
             Vector2 size,
+            Color4 multiplier,
             ITexture texture,
             Vector2? textureOrigin = null,
             Vector2? textureSize = null);

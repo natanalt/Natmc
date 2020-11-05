@@ -1,4 +1,5 @@
 using Natmc.Graphics;
+using Natmc.Graphics.Ogl3;
 using Natmc.Input;
 using Natmc.Logging;
 using Natmc.Platform;
@@ -48,7 +49,18 @@ namespace Natmc.Core
 
         public static void UpdateMainWindowTitle()
         {
-            MainWindow.Title = $"Natmc [{MainWindow.Fps} FPS] - {RenderingApi.DetailedName} - {MainWindow.CurrentState.GetType().Name}";
+            // FIXME: OpenGL 3.3 rendering dependency
+            MainWindow.Title =
+                $"Natmc [{MainWindow.Fps} FPS] - " +
+                $"{RenderingApi.DetailedName} - " +
+                $"{MainWindow.CurrentState.GetType().Name} - ";
+
+            var ogl3ra = (Ogl3RenderingApi)RenderingApi;
+            if (ogl3ra.DrawCallsPerFrame == 1)
+                MainWindow.Title += $"{ogl3ra.DrawCallsPerFrame} draw call per frame";
+            else
+                MainWindow.Title += $"{ogl3ra.DrawCallsPerFrame} draw calls per frame";
+
         }
     }
 }

@@ -59,6 +59,7 @@ namespace Natmc.Core
             m_CurrentState.Window = this;
         }
 
+        public abstract void ContextMakeCurrent();
         public abstract void Run();
     
         public void UpdateFramerate(float addedTime)

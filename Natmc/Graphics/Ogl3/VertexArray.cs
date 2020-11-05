@@ -18,6 +18,8 @@ namespace Natmc.Graphics.Ogl3
         public int VerticesCount { get; protected set; }
         public int IndicesCount { get; protected set; }
 
+        private int ActualIndexCount;
+
         public VertexArray(
             BufferUsageHint usageHint,
             VertexType[] vertices,
@@ -106,13 +108,14 @@ namespace Natmc.Graphics.Ogl3
         public void UpdateIndices(uint[] indices, int offset = 0)
         {
             Bind();
+            ActualIndexCount = indices.Length;
             GL.BufferSubData(BufferTarget.ElementArrayBuffer, (IntPtr)offset, indices.Length * sizeof(uint), indices);
         }
 
         public void Draw(ShaderProgram shader, BeginMode mode, int indices = -1)
         {
             if (indices == -1)
-                indices = IndicesCount;
+                indices = ActualIndexCount;
 
             Bind();
             shader.Use();

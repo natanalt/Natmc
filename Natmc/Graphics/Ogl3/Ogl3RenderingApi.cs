@@ -28,6 +28,9 @@ namespace Natmc.Graphics.Ogl3
         public StatedWindow Parent { get; }
         public List<Ogl3Texture> Textures { get; protected set; }
 
+        public int TotalDrawCalls { get; protected set; }
+        public int DrawCallsPerFrame { get; set; }
+
         private UiRenderer UiRenderer;
 
         public Ogl3RenderingApi(StatedWindow parent)
@@ -61,32 +64,37 @@ namespace Natmc.Graphics.Ogl3
             return texture;
         }
 
-        public void BeginFrame()
+        public void BeginFrame(float delta)
         {
+            DrawCallsPerFrame = 0;
         }
 
         public void EndFrame()
         {
+            TotalDrawCalls += DrawCallsPerFrame;
         }
 
         public void BeginUi()
         {
             UiRenderer.Begin();
         }
-        
+
         public void DrawColoredQuad(Vector2 position, Vector2 size, Color4 color)
         {
             UiRenderer.DrawColoredQuad(position, size, color);
         }
-        
+
         public void DrawTexturedQuad(
             Vector2 position,
             Vector2 size,
+            Color4 multiplier,
             ITexture texture,
             Vector2? textureOriginOpt = null,
             Vector2? textureSizeOpt = null)
         {
-            throw new NotImplementedException();
+            var textureOrigin = textureOriginOpt ?? Vector2.Zero;
+            var textureSize = textureSizeOpt ?? new Vector2(texture.Width, texture.Height);
+            UiRenderer.DrawTexturedQuad(position, size, multiplier, texture, textureOrigin, textureSize);
         }
 
         public void EndUi()
@@ -117,6 +125,11 @@ namespace Natmc.Graphics.Ogl3
         public void EndWorld()
         {
             throw new NotImplementedException();
+        }
+
+        public void ReportDrawCall()
+        {
+            DrawCallsPerFrame += 1;
         }
     }
 }

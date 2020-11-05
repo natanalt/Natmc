@@ -58,7 +58,11 @@ namespace Natmc.Graphics.Ogl3
                         f_Color = a_Color;
                         f_TextureCoords = a_TextureCoords;
                         f_SamplerIndex = a_SamplerIndex;
-                        gl_Position = u_Projection * vec4(a_Position, 0.0f, 1.0f);
+                        gl_Position = u_Projection * vec4(a_Position, -1.0f, 1.0f);
+                        
+                        // Shift the vertex coordinates, so that (0,0) points to bottom left corner
+                        gl_Position.x -= 1;
+                        gl_Position.y -= 1;
                     }
                 
                 ", ShaderType.VertexShader),
@@ -77,9 +81,9 @@ namespace Natmc.Graphics.Ogl3
                 
                     void main()
                     {
-                        if (f_SamplerIndex == uint(0))
+                        if (f_SamplerIndex >= uint(0))
                             o_Color = f_Color;
-                        else
+                        else if (f_SamplerIndex == uint(2123))
                             o_Color = texture(u_Textures[f_SamplerIndex - uint(1)], f_TextureCoords) * f_Color;
                     }
                 
@@ -146,37 +150,101 @@ namespace Natmc.Graphics.Ogl3
             });
         }
 
+        public void DrawTexturedQuad(
+            Vector2 position,
+            Vector2 size,
+            Color4 color,
+            ITexture texture,
+            Vector2 textureOrigin,
+            Vector2 textureSize)
+        {
+            if (!HasRemainingQuads)
+                DrawPending();
+
+            if (!(texture is Ogl3Texture))
+                throw new InvalidOperationException("Invalid texture type");
+            var samplerIndex = AddTexture((Ogl3Texture)texture) + 1;
+
+            textureOrigin = texture.PixelToNormalized(new Vector2i((int)textureOrigin.X, (int)textureOrigin.Y));
+            textureSize = texture.PixelToNormalized(new Vector2i((int)textureSize.X, (int)textureSize.Y));
+
+            var vertexBase = (uint)PendingVertices.Count;
+
+            PendingVertices.Add(new UiVertex(
+                position,
+                color,
+                textureOrigin,
+                samplerIndex));
+
+            PendingVertices.Add(new UiVertex(
+                position + new Vector2(size.X, 0),
+                color,
+                textureOrigin + new Vector2(textureSize.X, 0),
+                samplerIndex));
+            
+            PendingVertices.Add(new UiVertex(
+                position + new Vector2(0, size.Y),
+                color,
+                textureOrigin + new Vector2(0, textureSize.Y),
+                samplerIndex));
+            
+            PendingVertices.Add(new UiVertex(
+                position + new Vector2(size.X, size.Y),
+                color,
+                textureOrigin + new Vector2(textureSize.X, textureSize.Y),
+                samplerIndex));
+
+            PendingIndices.AddRange(new uint[]
+            {
+                vertexBase + 0,
+                vertexBase + 1,
+                vertexBase + 2,
+                vertexBase + 1,
+                vertexBase + 2,
+                vertexBase + 3,
+            });
+        }
+
         private void DrawPending()
         {
+            if (PendingIndices.Count == 0)
+                return;
+
             UiShader.Use();
-            UiShader.SetMatrix4("u_Projection", Matrix4.CreateOrthographic(
-                Window.Size.X, Window.Size.Y,
-                0.0001f, 1000.0f));
-            UiShader.SetUint("u_Textures[0]", GetSamplerIndices());
+            UiShader.SetMatrix4("u_Projection", Matrix4.CreateOrthographic(Window.Size.X, Window.Size.Y, 0.0001f, 1000.0f));
+            UiShader.SetUint("u_Textures[0]", PrepareSamplerIndices());
 
             Vao.Bind();
-            Vao.UpdateIndices(PendingIndices.ToArray());
             Vao.UpdateIndices(PendingIndices.ToArray());
             Vao.UpdateVertices(PendingVertices.ToArray());
 
             Vao.Draw(UiShader, BeginMode.Triangles);
+            RenderingApi.ReportDrawCall();
 
             ClearPendingBuffers();
         }
 
-        private int? TryAddTexture(Ogl3Texture texture)
+        private int AddTexture(Ogl3Texture texture)
         {
+            var existingOne = PendingTextures.FindIndex(x => x.GlHandle == texture.GlHandle);
+            if (existingOne != -1)
+                return existingOne;
+
             if (RemainingTextures == 0)
-                return null;
+                DrawPending();
             PendingTextures.Add(texture);
             return PendingTextures.Count - 1;
         }
 
-        private uint[] GetSamplerIndices()
+        private uint[] PrepareSamplerIndices()
         {
             var result = new uint[PendingTextures.Count];
             for (int i = 0; i < PendingTextures.Count; i += 1)
+            {
                 result[i] = (uint)i + 1;
+                GL.BindTexture(TextureTarget.Texture2D, PendingTextures[i].GlHandle);
+                GL.ActiveTexture(TextureUnit.Texture0 + i);
+            }
             return result;
         }
 

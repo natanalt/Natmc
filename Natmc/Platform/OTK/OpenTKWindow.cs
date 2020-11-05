@@ -69,6 +69,7 @@ namespace Natmc.Platform.OTK
             };
         }
 
+        public override void ContextMakeCurrent() => InternalWindow.Context.MakeCurrent();
         public override void Run() => InternalWindow.Run();
     }
 }
