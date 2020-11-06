@@ -13,8 +13,8 @@ namespace Natmc.Resources.Textures
     {
         private static readonly LogScope Log = new LogScope("TextureManager");
 
-        public static readonly Color4 ErrorColorA = new Color4(0xF8, 0x00, 0xF8, 0xFF);
-        public static readonly Color4 ErrorColorB = new Color4(0x00, 0x00, 0x00, 0xFF);
+        public static readonly Color4 ErrorColorA = new Color4(0x00, 0x00, 0x00, 0xFF);
+        public static readonly Color4 ErrorColorB = new Color4(0xF8, 0x00, 0xF8, 0xFF);
 
         public Dictionary<NamespacedId, ITexture> LoadedTextures { get; protected set; }
         public ITexture ErrorTexture { get; protected set; }

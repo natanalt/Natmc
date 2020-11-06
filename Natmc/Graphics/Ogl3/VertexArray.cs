@@ -79,6 +79,7 @@ namespace Natmc.Graphics.Ogl3
                 [typeof(Vector4i)] = new Tuple<int, VertexAttribPointerType>(4, VertexAttribPointerType.Int),
                 [typeof(int)] = new Tuple<int, VertexAttribPointerType>(1, VertexAttribPointerType.Int),
                 [typeof(uint)] = new Tuple<int, VertexAttribPointerType>(1, VertexAttribPointerType.UnsignedInt),
+                [typeof(float)] = new Tuple<int, VertexAttribPointerType>(1, VertexAttribPointerType.Float),
             };
 
             var field = typeof(VertexType).GetField(fieldName);

@@ -17,9 +17,7 @@ namespace Natmc.Graphics.Ogl3
             Width = width;
             Height = height;
 
-            Console.WriteLine(GL.GetError());
             GlHandle = GL.GenTexture();
-            Console.WriteLine(GL.GetError());
             GL.BindTexture(TextureTarget.Texture2D, GlHandle);
             GL.TexImage2D(
                 TextureTarget.Texture2D,
@@ -29,8 +27,13 @@ namespace Natmc.Graphics.Ogl3
                 height,
                 0,
                 PixelFormat.Rgba,
-                PixelType.Byte,
+                PixelType.UnsignedByte,
                 rgbaData);
+
+            // TODO: more texture customization APIs (mostly wrapping setting)
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
 

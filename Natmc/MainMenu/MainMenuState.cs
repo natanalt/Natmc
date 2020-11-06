@@ -24,6 +24,7 @@ namespace Natmc.MainMenu
 
         public override void OnRender(float delta)
         {
+            Window.ClearColor = Color4.Black;
             RenderingApi.BeginFrame(delta);
             RenderingApi.BeginUi();
             RenderingApi.DrawColoredQuad(new Vector2(0, 0), new Vector2(100, 200), Color4.DarkSlateGray);

@@ -45,19 +45,19 @@ namespace Natmc.Graphics.Ogl3
                     layout (location = 0) in vec2 a_Position;
                     layout (location = 1) in vec4 a_Color;
                     layout (location = 2) in vec2 a_TextureCoords;
-                    layout (location = 3) in uint a_SamplerIndex;
+                    layout (location = 3) in float a_SamplerIndex;
                 
                     uniform mat4 u_Projection;
                 
                     out vec4 f_Color;
                     out vec2 f_TextureCoords;
-                    flat out uint f_SamplerIndex;
+                    flat out int f_SamplerIndex;
                 
                     void main()
                     {
                         f_Color = a_Color;
                         f_TextureCoords = a_TextureCoords;
-                        f_SamplerIndex = a_SamplerIndex;
+                        f_SamplerIndex = int(a_SamplerIndex);
                         gl_Position = u_Projection * vec4(a_Position, -1.0f, 1.0f);
                         
                         // Shift the vertex coordinates, so that (0,0) points to bottom left corner
@@ -73,7 +73,7 @@ namespace Natmc.Graphics.Ogl3
                 
                     in vec4 f_Color;
                     in vec2 f_TextureCoords;
-                    flat in uint f_SamplerIndex;
+                    flat in int f_SamplerIndex;
                 
                     uniform sampler2D u_Textures[${MaxTextureUnits}];
                 
@@ -81,10 +81,10 @@ namespace Natmc.Graphics.Ogl3
                 
                     void main()
                     {
-                        if (f_SamplerIndex >= uint(0))
+                        if (f_SamplerIndex == 0)
                             o_Color = f_Color;
-                        else if (f_SamplerIndex == uint(2123))
-                            o_Color = texture(u_Textures[f_SamplerIndex - uint(1)], f_TextureCoords) * f_Color;
+                        else
+                            o_Color = texture(u_Textures[f_SamplerIndex - 1], f_TextureCoords) * f_Color;
                     }
                 
                 ".Replace("${MaxTextureUnits}", GL.GetInteger(GetPName.MaxTextureImageUnits).ToString()), ShaderType.FragmentShader),
@@ -212,7 +212,12 @@ namespace Natmc.Graphics.Ogl3
 
             UiShader.Use();
             UiShader.SetMatrix4("u_Projection", Matrix4.CreateOrthographic(Window.Size.X, Window.Size.Y, 0.0001f, 1000.0f));
-            UiShader.SetUint("u_Textures[0]", PrepareSamplerIndices());
+
+            var samplerData = PrepareSamplerIndices();
+            //UiShader.SetInt("u_Textures[0]", samplerData);
+
+            GL.Uniform1(GL.GetUniformLocation(UiShader.Handle, "u_Textures"), samplerData.Length, samplerData);
+            Console.WriteLine(GL.GetError());
 
             Vao.Bind();
             Vao.UpdateIndices(PendingIndices.ToArray());
@@ -236,14 +241,15 @@ namespace Natmc.Graphics.Ogl3
             return PendingTextures.Count - 1;
         }
 
-        private uint[] PrepareSamplerIndices()
+        private int[] PrepareSamplerIndices()
         {
-            var result = new uint[PendingTextures.Count];
+            var result = new int[PendingTextures.Count];
             for (int i = 0; i < PendingTextures.Count; i += 1)
             {
-                result[i] = (uint)i + 1;
-                GL.BindTexture(TextureTarget.Texture2D, PendingTextures[i].GlHandle);
+                result[i] = i;
                 GL.ActiveTexture(TextureUnit.Texture0 + i);
+                GL.BindTexture(TextureTarget.Texture2D, PendingTextures[i].GlHandle);
+                
             }
             return result;
         }
