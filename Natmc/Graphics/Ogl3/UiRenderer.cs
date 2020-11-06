@@ -214,10 +214,7 @@ namespace Natmc.Graphics.Ogl3
             UiShader.SetMatrix4("u_Projection", Matrix4.CreateOrthographic(Window.Size.X, Window.Size.Y, 0.0001f, 1000.0f));
 
             var samplerData = PrepareSamplerIndices();
-            //UiShader.SetInt("u_Textures[0]", samplerData);
-
-            GL.Uniform1(GL.GetUniformLocation(UiShader.Handle, "u_Textures"), samplerData.Length, samplerData);
-            Console.WriteLine(GL.GetError());
+            UiShader.SetInt("u_Textures[0]", samplerData);
 
             Vao.Bind();
             Vao.UpdateIndices(PendingIndices.ToArray());
