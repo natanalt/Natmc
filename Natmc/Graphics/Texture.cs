@@ -1,18 +1,19 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Natmc.Graphics.Ogl3
+namespace Natmc.Graphics
 {
-    public class Ogl3Texture : ITexture
+    public class Texture
     {
         public int Width { get; protected set; }
         public int Height { get; protected set; }
         public int GlHandle { get; protected set; }
         public bool Valid => GlHandle > 0;
 
-        public Ogl3Texture(int width, int height, byte[] rgbaData)
+        public Texture(int width, int height, byte[] rgbaData)
         {
             Width = width;
             Height = height;
@@ -42,6 +43,9 @@ namespace Natmc.Graphics.Ogl3
             GL.BindTexture(TextureTarget.Texture2D, GlHandle);
             GL.ActiveTexture(TextureUnit.Texture0 + unit);
         }
+
+        public Vector2 PixelToNormalized(Vector2i coords)
+            => new Vector2((float)coords.X / Width, (float)coords.Y / Height);
 
         public void Dispose()
         {

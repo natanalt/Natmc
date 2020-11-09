@@ -18,7 +18,6 @@ namespace Natmc.Core
 
         public override void OnEnable()
         {
-            Log.Info($"Used renderer: {RenderingApi.Name} ({RenderingApi.DetailedName})");
             Log.Info($"Starting loader thread");
             //LoadingThread = new Thread(() =>
             //{

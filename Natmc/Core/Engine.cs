@@ -1,9 +1,6 @@
 using Natmc.Graphics;
-using Natmc.Graphics.Ogl3;
 using Natmc.Input;
 using Natmc.Logging;
-using Natmc.Platform;
-using Natmc.Platform.OTK;
 using Natmc.Resources;
 using Natmc.Settings;
 using OpenTK.Mathematics;
@@ -21,9 +18,8 @@ namespace Natmc.Core
         public const string Version = "0.1.0";
         public const string McVersion = "1.16.3";
 
-        public static IPlatform Platform { get; private set; }
         public static StatedWindow MainWindow { get; private set; }
-        public static IRenderingApi RenderingApi => MainWindow.RenderingApi;
+        public static GfxRenderer Renderer => MainWindow.Renderer;
 
         public static void Start()
         {
@@ -39,11 +35,8 @@ namespace Natmc.Core
             SettingsManager.Init();
             InputManager.Init();
 
-            Log.Info($"Initializing platform");
-            Platform = new OpenTKPlatform();
-
             Log.Info($"Creating main window");
-            MainWindow = Platform.CreateWindow("Natmc", new Vector2i(800, 600), new LoaderState());
+            MainWindow = new StatedWindow("Natmc", new Vector2i(800, 600), new LoaderState());
             MainWindow.Run();
         }
 
@@ -52,14 +45,12 @@ namespace Natmc.Core
             // FIXME: OpenGL 3.3 rendering dependency
             MainWindow.Title =
                 $"Natmc [{MainWindow.Fps} FPS] - " +
-                $"{RenderingApi.DetailedName} - " +
                 $"{MainWindow.CurrentState.GetType().Name} - ";
 
-            var ogl3ra = (Ogl3RenderingApi)RenderingApi;
-            if (ogl3ra.DrawCallsPerFrame == 1)
-                MainWindow.Title += $"{ogl3ra.DrawCallsPerFrame} draw call per frame";
+            if (Renderer.DrawCallsPerFrame == 1)
+                MainWindow.Title += $"{Renderer.DrawCallsPerFrame} draw call per frame";
             else
-                MainWindow.Title += $"{ogl3ra.DrawCallsPerFrame} draw calls per frame";
+                MainWindow.Title += $"{Renderer.DrawCallsPerFrame} draw calls per frame";
 
         }
     }

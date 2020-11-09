@@ -16,12 +16,12 @@ namespace Natmc.Resources.Textures
         public static readonly Color4 ErrorColorA = new Color4(0x00, 0x00, 0x00, 0xFF);
         public static readonly Color4 ErrorColorB = new Color4(0xF8, 0x00, 0xF8, 0xFF);
 
-        public Dictionary<NamespacedId, ITexture> LoadedTextures { get; protected set; }
-        public ITexture ErrorTexture { get; protected set; }
+        public Dictionary<NamespacedId, Texture> LoadedTextures { get; protected set; }
+        public Texture ErrorTexture { get; protected set; }
 
         public void Init()
         {
-            LoadedTextures = new Dictionary<NamespacedId, ITexture>();
+            LoadedTextures = new Dictionary<NamespacedId, Texture>();
             
             var errorTextureData = new byte[16 * 16 * 4];
             for (var x = 0; x < 16 / 2; x += 1)
@@ -46,7 +46,7 @@ namespace Natmc.Resources.Textures
                     errorTextureData[(8 + y) * 16 * 4 + x * 4 + 3] = (byte)(ErrorColorB.A * 255);
                 }
             }
-            ErrorTexture = Engine.RenderingApi.CreateTexture(errorTextureData, 16, 16);
+            ErrorTexture = Engine.Renderer.CreateTexture(errorTextureData, 16, 16);
         }
 
         public void Deinit()
@@ -63,7 +63,7 @@ namespace Natmc.Resources.Textures
             LoadedTextures.Clear();
         }
 
-        public ITexture Get(NamespacedId id, bool loadIfUnloaded = true)
+        public Texture Get(NamespacedId id, bool loadIfUnloaded = true)
         {
             if (!LoadedTextures.ContainsKey(id))
             {
@@ -82,13 +82,15 @@ namespace Natmc.Resources.Textures
                 LoadedTextures[id].Dispose();  
             }
 
+            Log.Info($"Loading texture {id}...");
+
             try
             {
                 var data = ImageLoader.Load(ResolveTexturePath(id));
                 if (data == null)
                     throw new Exception("Not found");
 
-                LoadedTextures[id] = Engine.RenderingApi.CreateTexture(
+                LoadedTextures[id] = Engine.Renderer.CreateTexture(
                     data.Value.Data,
                     data.Value.Width,
                     data.Value.Height);

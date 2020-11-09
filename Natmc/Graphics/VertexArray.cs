@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Natmc.Graphics.Ogl3
+namespace Natmc.Graphics
 {
     public class VertexArray<VertexType> : IDisposable where VertexType : struct
     {

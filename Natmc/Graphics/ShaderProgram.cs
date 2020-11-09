@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Natmc.Graphics.Ogl3
+namespace Natmc.Graphics
 {
     public class ShaderProgram : IDisposable
     {

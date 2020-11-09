@@ -25,12 +25,12 @@ namespace Natmc.MainMenu
         public override void OnRender(float delta)
         {
             Window.ClearColor = Color4.Black;
-            RenderingApi.BeginFrame(delta);
-            RenderingApi.BeginUi();
-            RenderingApi.DrawColoredQuad(new Vector2(0, 0), new Vector2(100, 200), Color4.DarkSlateGray);
-            RenderingApi.DrawTexturedQuad(new Vector2(100, 100), new Vector2(100, 100), Color4.White, ResourceManager.Texture.ErrorTexture);
-            RenderingApi.EndUi();
-            RenderingApi.EndFrame();
+            Renderer.BeginFrame(delta);
+            Renderer.BeginUi();
+            Renderer.DrawColoredQuad(new Vector2(0, 0), new Vector2(100, 200), Color4.DarkSlateGray);
+            Renderer.DrawTexturedQuad(new Vector2(100, 100), new Vector2(100, 100), Color4.White, ResourceManager.Texture.ErrorTexture);
+            Renderer.EndUi();
+            Renderer.EndFrame();
         }
 
         public override void OnResize(int nw, int nh)

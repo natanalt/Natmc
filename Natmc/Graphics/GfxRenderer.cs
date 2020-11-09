@@ -6,14 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Natmc.Graphics.Ogl3
+namespace Natmc.Graphics
 {
-    public class Ogl3RenderingApi : IRenderingApi
+    public class GfxRenderer
     {
-        private static readonly LogScope Log = new LogScope("Ogl3RenderingApi");
-
-        public string Name => "OGL3";
-        public virtual string DetailedName => "Natmc OpenGL 3.3 Renderer";
+        private static readonly LogScope Log = new LogScope("Renderer");
 
         private static bool ReportedInfo = false;
         public static void ReportInfo()
@@ -26,21 +23,21 @@ namespace Natmc.Graphics.Ogl3
         }
 
         public StatedWindow Parent { get; }
-        public List<Ogl3Texture> Textures { get; protected set; }
+        public List<Texture> Textures { get; protected set; }
 
         public int TotalDrawCalls { get; protected set; }
         public int DrawCallsPerFrame { get; set; }
 
         private UiRenderer UiRenderer;
 
-        public Ogl3RenderingApi(StatedWindow parent)
+        public GfxRenderer(StatedWindow parent)
         {
             Parent = parent;
         }
 
         public void Init()
         {
-            Textures = new List<Ogl3Texture>();
+            Textures = new List<Texture>();
             UiRenderer = new UiRenderer(Parent);
 
             if (!ReportedInfo)
@@ -57,9 +54,9 @@ namespace Natmc.Graphics.Ogl3
             }
         }
 
-        public ITexture CreateTexture(byte[] rawData, int width, int height)
+        public Texture CreateTexture(byte[] rawData, int width, int height)
         {
-            var texture = new Ogl3Texture(width, height, rawData);
+            var texture = new Texture(width, height, rawData);
             Textures.Add(texture);
             return texture;
         }
@@ -88,7 +85,7 @@ namespace Natmc.Graphics.Ogl3
             Vector2 position,
             Vector2 size,
             Color4 multiplier,
-            ITexture texture,
+            Texture texture,
             Vector2? textureOriginOpt = null,
             Vector2? textureSizeOpt = null)
         {

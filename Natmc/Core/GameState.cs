@@ -8,7 +8,7 @@ namespace Natmc.Core
     public abstract class GameState
     {
         public StatedWindow Window { get; set; }
-        public IRenderingApi RenderingApi => Window.RenderingApi;
+        public GfxRenderer Renderer => Window.Renderer;
 
         public abstract void OnEnable();
         public abstract void OnDisable();

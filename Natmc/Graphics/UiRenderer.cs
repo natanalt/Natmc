@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Natmc.Graphics.Ogl3
+namespace Natmc.Graphics
 {
     public class UiRenderer : IDisposable
     {
@@ -14,7 +14,7 @@ namespace Natmc.Graphics.Ogl3
         public const int IndicesPerQuad = 6;
 
         public StatedWindow Window { get; }
-        public Ogl3RenderingApi RenderingApi { get; }
+        public GfxRenderer RenderingApi { get; }
         public ShaderProgram UiShader { get; }
 
         public int MaxQuads { get; protected set; }
@@ -24,7 +24,7 @@ namespace Natmc.Graphics.Ogl3
 
         private List<UiVertex> PendingVertices;
         private List<uint> PendingIndices;
-        private List<Ogl3Texture> PendingTextures;
+        private List<Texture> PendingTextures;
         public int RemainingVertices => MaxVertices - PendingVertices.Count;
         public int RemainingIndices => MaxIndices - PendingIndices.Count;
         public int RemainingTextures => MaxTextures - PendingTextures.Count;
@@ -35,7 +35,7 @@ namespace Natmc.Graphics.Ogl3
         public UiRenderer(StatedWindow window, int maxQuadCount = DefaultMaxQuads)
         {
             Window = window;
-            RenderingApi = (Ogl3RenderingApi)Window.RenderingApi;
+            RenderingApi = (GfxRenderer)Window.Renderer;
             UiShader = ShaderProgram.Link(new ShaderSingle[]
             {
                 ShaderSingle.Compile(@"
@@ -97,7 +97,7 @@ namespace Natmc.Graphics.Ogl3
 
             PendingVertices = new List<UiVertex>();
             PendingIndices = new List<uint>();
-            PendingTextures = new List<Ogl3Texture>();
+            PendingTextures = new List<Texture>();
 
             Vao = new VertexArray<UiVertex>(
                 BufferUsageHint.DynamicDraw,
@@ -154,16 +154,16 @@ namespace Natmc.Graphics.Ogl3
             Vector2 position,
             Vector2 size,
             Color4 color,
-            ITexture texture,
+            Texture texture,
             Vector2 textureOrigin,
             Vector2 textureSize)
         {
             if (!HasRemainingQuads)
                 DrawPending();
 
-            if (!(texture is Ogl3Texture))
+            if (!(texture is Texture))
                 throw new InvalidOperationException("Invalid texture type");
-            var samplerIndex = AddTexture((Ogl3Texture)texture) + 1;
+            var samplerIndex = AddTexture((Texture)texture) + 1;
 
             textureOrigin = texture.PixelToNormalized(new Vector2i((int)textureOrigin.X, (int)textureOrigin.Y));
             textureSize = texture.PixelToNormalized(new Vector2i((int)textureSize.X, (int)textureSize.Y));
@@ -226,7 +226,7 @@ namespace Natmc.Graphics.Ogl3
             ClearPendingBuffers();
         }
 
-        private int AddTexture(Ogl3Texture texture)
+        private int AddTexture(Texture texture)
         {
             var existingOne = PendingTextures.FindIndex(x => x.GlHandle == texture.GlHandle);
             if (existingOne != -1)

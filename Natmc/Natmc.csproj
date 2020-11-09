@@ -11,4 +11,8 @@
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Ui\Widget\" />
+  </ItemGroup>
+
 </Project>
