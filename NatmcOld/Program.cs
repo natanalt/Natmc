@@ -1,4 +1,7 @@
-﻿using System;
+using Natmc.Core;
+using Natmc.Json;
+using Newtonsoft.Json.Linq;
+using System;
 
 namespace Natmc
 {
@@ -6,6 +9,7 @@ namespace Natmc
     {
         static void Main(string[] args)
         {
+            Engine.Start();
         }
     }
 }
