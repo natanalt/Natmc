@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Natmc.Core;
+using System;
 
 namespace Natmc
 {
@@ -6,6 +7,8 @@ namespace Natmc
     {
         static void Main(string[] args)
         {
+            var engine = new Engine();
+            engine.Run();
         }
     }
 }
